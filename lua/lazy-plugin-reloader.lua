@@ -1,7 +1,8 @@
-local function get_keys(t)
+local function table_format(t)
   local keys = {}
   for key, _ in pairs(t) do
-    table.insert(keys, key, vim.inspect(t[key][1]))
+    value = string.match(vim.inspect(t[key][1]), '.-/([^/]+)$', 1):gsub('"', '')
+    table.insert(keys, key, value)
   end
   return keys
 end
@@ -9,7 +10,7 @@ end
 local Popup = require 'nui.popup'
 local buf = vim.api.nvim_create_buf(false, true)
 local plugins_with_table = require('lazy').plugins()
-plugins = get_keys(plugins_with_table)
+local plugins = table_format(plugins_with_table)
 vim.api.nvim_buf_set_lines(buf, 0, 100, false, plugins)
 local popup = Popup {
   position = '50%',
@@ -46,4 +47,10 @@ local popup = Popup {
   },
   bufnr = buf,
 }
+local ok = popup:map('n', 'l', function(bufnr)
+  local r, c = vim.inspect(vim.api.nvim_win_get_cursor(0))
+  print(r, c)
+
+  vim.cmd('Lazy reload ' .. vim.api.nvim_get_current_line())
+end, { noremap = true })
 popup:mount()
