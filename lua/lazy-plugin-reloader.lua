@@ -6,12 +6,19 @@ local function table_format(t)
   end
   return keys
 end
+function tablelength(T)
+  local count = 0
+  for _ in pairs(T) do
+    count = count + 1
+  end
+  return count
+end
 
 local Popup = require 'nui.popup'
 local buf = vim.api.nvim_create_buf(false, true)
 local plugins_with_table = require('lazy').plugins()
 local plugins = table_format(plugins_with_table)
-vim.api.nvim_buf_set_lines(buf, 0, 100, false, plugins)
+vim.api.nvim_buf_set_lines(buf, 0, tablelength(plugins), false, plugins)
 local popup = Popup {
   position = '50%',
   size = {
@@ -47,10 +54,10 @@ local popup = Popup {
   },
   bufnr = buf,
 }
-local ok = popup:map('n', 'l', function(bufnr)
-  local r, c = vim.inspect(vim.api.nvim_win_get_cursor(0))
-  print(r, c)
 
-  vim.cmd('Lazy reload ' .. vim.api.nvim_get_current_line())
-end, { noremap = true })
-popup:mount()
+function OpenReloadPopup()
+  local ok = popup:map('n', 'l', function(bufnr)
+    vim.cmd('Lazy reload ' .. vim.api.nvim_get_current_line())
+  end, { noremap = true })
+  popup:mount()
+end
